@@ -7,27 +7,22 @@ red, green, blue = image.split()
 width, height = image.size
 
 shift = 10
+half_shift = shift // 2
 
-red_shifted = Image.new("L", (width, height))
-blue_shifted = Image.new("L", (width, height))
+red_left_crop = red.crop((shift, 0, width, height))  # Режем слева
+red_both_crop = red.crop((half_shift, 0, width - half_shift, height))  # Режем по бокам
+red_blend = Image.blend(red_left_crop, red_both_crop, alpha=0.5)  # Смешиваем
 
-red_shifted.paste(red.crop((0, 0, width - shift, height)), (shift, 0))
-red_shifted.paste(red.crop((width - shift, 0, width, height)), (0, 0))
+blue_right_crop = blue.crop((0, 0, width - shift, height))  # Режем справа
+blue_both_crop = blue.crop((half_shift, 0, width - half_shift, height))  # Режем по бокам
+blue_blend = Image.blend(blue_right_crop, blue_both_crop, alpha=0.5)  # Смешиваем
 
-blue_shifted.paste(blue.crop((shift, 0, width, height)), (0, 0))
-blue_shifted.paste(blue.crop((0, 0, shift, height)), (width - shift, 0))
+green_cropped = green.crop((half_shift, 0, width - half_shift, height))  # Режем по бокам
 
-green_cropped = green.crop((shift, 0, width - shift, height))
+shifted_image = Image.merge("RGB", (red_blend, green_cropped, blue_blend))
 
-final_width = width - shift * 2
-red_final = red_shifted.crop((shift, 0, shift + final_width, height))
-blue_final = blue_shifted.crop((shift, 0, shift + final_width, height))
-
-shifted_image = Image.merge("RGB", (red_final, green_cropped, blue_final))
-
-shifted_image.save("red_blue_shifted_fixed.jpg")
+shifted_image.save("final_image.jpg")
 
 shifted_image.thumbnail((80, 80))
 
 shifted_image.save("avatar.jpg")
-
